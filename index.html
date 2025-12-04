@@ -11,16 +11,12 @@
     <meta name="apple-mobile-web-app-title" content="支払いリスト">
     <meta name="theme-color" content="#ffffff">
 
-    <!-- 
-      アイコン設定: 
-      ホーム画面に追加した際のアイコンです。
-      反映されない場合は、一度ホーム画面からアイコンを削除し、再度「ホーム画面に追加」を行ってください。
-    -->
-    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231e293b'/%3E%3Cg transform='translate(64, 64) scale(16)' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12V7H5a2 2 0 0 1 0-4h14v4'/%3E%3Cpath d='M3 5v14a2 2 0 0 0 2 2h16v-5'/%3E%3Cpath d='M18 12a2 2 0 0 0 0 4h4v-4Z'/%3E%3C/g%3E%3C/svg%3E">
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231e293b'/%3E%3Cg transform='translate(64, 64) scale(16)' fill='none' stroke='white' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M21 12V7H5a2 2 0 0 1 0-4h14v4'/%3E%3Cpath d='M3 5v14a2 2 0 0 0 2 2h16v-5'/%3E%3Cpath d='M18 12a2 2 0 0 0 0 4h4v-4Z'/%3E%3C/g%3E%3C/svg%3E">
+    <!-- アイコン用のプレースホルダー（JSがここを書き換えます） -->
+    <link id="app-icon" rel="apple-touch-icon" href="">
+    <link id="favicon" rel="icon" href="">
 
-    <!-- Web App Manifest -->
-    <link rel="manifest" href='data:application/manifest+json,{"name":"家計支払いリスト","short_name":"支払いリスト","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#ffffff","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 fill=%27%231e293b%27/%3E%3Cg transform=%27translate(64, 64) scale(16)%27 fill=%27none%27 stroke=%27white%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M21 12V7H5a2 2 0 0 1 0-4h14v4%27/%3E%3Cpath d=%27M3 5v14a2 2 0 0 0 2 2h16v-5%27/%3E%3Cpath d=%27M18 12a2 2 0 0 0 0 4h4v-4Z%27/%3E%3C/g%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"},{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 fill=%27%231e293b%27/%3E%3Cg transform=%27translate(64, 64) scale(16)%27 fill=%27none%27 stroke=%27white%27 stroke-width=%271.5%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3E%3Cpath d=%27M21 12V7H5a2 2 0 0 1 0-4h14v4%27/%3E%3Cpath d=%27M3 5v14a2 2 0 0 0 2 2h16v-5%27/%3E%3Cpath d=%27M18 12a2 2 0 0 0 0 4h4v-4Z%27/%3E%3C/g%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml"}]}'>
+    <!-- Web App Manifest (Placeholder) -->
+    <link id="manifest" rel="manifest" href='data:application/manifest+json,{"name":"家計支払いリスト","short_name":"支払いリスト","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#ffffff","icons":[]}'>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -29,7 +25,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
     <style>
       body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
-      /* Disable pull-to-refresh on mobile */
       body { overscroll-behavior-y: none; }
     </style>
 
@@ -46,6 +41,73 @@
     
     <!-- Babel Standalone for in-browser JSX compilation -->
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- ★アイコン生成スクリプト（ここだけでアイコンを管理します）★ -->
+    <script>
+        (function() {
+            // 1. アイコンのデザイン定義 (SVG)
+            // ヘッダーと同じWalletアイコン、背景はSlate-800、線は白
+            const iconSvg = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+                <rect width="512" height="512" fill="#1e293b" rx="100"/>
+                <g transform="translate(64, 64) scale(16)" fill="none" stroke="white" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12V7H5a2 2 0 0 1 0-4h14v4"/>
+                    <path d="M3 5v14a2 2 0 0 0 2 2h16v-5"/>
+                    <path d="M18 12a2 2 0 0 0 0 4h4v-4Z"/>
+                </g>
+            </svg>`.trim();
+
+            // 2. SVGをPNG画像(DataURI)に変換する関数
+            function setIcons() {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+
+                const img = new Image();
+                // SVGをBase64化して読み込ませる
+                const svgData = 'data:image/svg+xml;base64,' + btoa(iconSvg);
+                
+                img.onload = function() {
+                    // キャンバスに描画
+                    ctx.drawImage(img, 0, 0);
+                    
+                    // PNG形式のデータURLを取得
+                    const pngUrl = canvas.toDataURL('image/png');
+
+                    // HTMLのタグを更新
+                    document.getElementById('app-icon').href = pngUrl;
+                    document.getElementById('favicon').href = pngUrl;
+
+                    // マニフェストファイルも更新
+                    const manifestLink = document.getElementById('manifest');
+                    const manifest = {
+                        name: "家計支払いリスト",
+                        short_name: "支払いリスト",
+                        start_url: ".",
+                        display: "standalone",
+                        background_color: "#ffffff",
+                        theme_color: "#ffffff",
+                        icons: [
+                            { src: pngUrl, sizes: "192x192", type: "image/png" },
+                            { src: pngUrl, sizes: "512x512", type: "image/png" }
+                        ]
+                    };
+                    manifestLink.href = 'data:application/manifest+json,' + encodeURIComponent(JSON.stringify(manifest));
+                    
+                    console.log("Icon updated to PNG via JS");
+                };
+                img.src = svgData;
+            }
+
+            // 実行
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', setIcons);
+            } else {
+                setIcons();
+            }
+        })();
+    </script>
 </head>
 <body class="bg-gray-50">
     <div id="root"></div>
@@ -57,7 +119,6 @@
 
         // --- COMPONENTS ---
 
-        // 1. StatsCard Component
         const StatsCard = ({ amount }) => {
           return (
             <div className="bg-white rounded-lg p-2 shadow-sm border border-slate-200 text-center">
@@ -72,7 +133,6 @@
           );
         };
 
-        // 2. TransactionForm Component
         const TransactionForm = ({ onAdd }) => {
           const [title, setTitle] = useState('');
           const [amount, setAmount] = useState('');
@@ -96,7 +156,6 @@
           return (
             <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-2">
               <form onSubmit={handleSubmit} className="flex gap-2 items-center">
-                {/* Title Input */}
                 <input
                     type="text"
                     required
@@ -105,8 +164,6 @@
                     onChange={(e) => setTitle(e.target.value)}
                     className="flex-[2] px-3 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
                 />
-
-                {/* Amount Input */}
                 <div className="flex-1 relative min-w-[90px]">
                     <span className="absolute left-2 top-1.5 text-slate-400 text-sm">¥</span>
                     <input
@@ -119,8 +176,6 @@
                         className="w-full pl-5 pr-2 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium"
                     />
                 </div>
-
-                {/* Submit Button */}
                 <button
                     type="submit"
                     className="flex-shrink-0 bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded transition-colors shadow-sm"
@@ -133,7 +188,6 @@
           );
         };
 
-        // 3. TransactionList Component
         const TransactionList = ({ transactions, onDelete, onToggleStatus }) => {
           if (transactions.length === 0) {
             return (
@@ -152,7 +206,6 @@
                     transaction.isPaid ? 'bg-slate-50' : 'bg-white'
                   }`}
                 >
-                  {/* Left: Status & Title */}
                   <div className="flex items-center gap-2 flex-1 min-w-0">
                     <button
                       onClick={() => onToggleStatus(transaction.id)}
@@ -170,20 +223,18 @@
                     </p>
                   </div>
 
-                  {/* Right: Amount & Actions */}
                   <div className="flex items-center gap-2">
                     <p className={`text-sm font-bold tabular-nums ${transaction.isPaid ? 'text-slate-400' : 'text-slate-900'}`}>
                       ¥{transaction.amount.toLocaleString()}
                     </p>
 
                     <div className="flex items-center pl-1">
-                      {/* Delete Button */}
                       <button
                         type="button"
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation(); 
-                            e.nativeEvent.stopImmediatePropagation(); // Ensure absolute priority
+                            e.nativeEvent.stopImmediatePropagation();
                             onDelete(transaction.id);
                         }}
                         className="relative z-10 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
@@ -201,19 +252,13 @@
 
         // --- MAIN APP ---
         const App = () => {
-          // Helper for ID generation
           const generateId = () => {
             if (typeof crypto !== 'undefined' && crypto.randomUUID) {
-              try {
-                return crypto.randomUUID();
-              } catch (e) {
-                // Fallback
-              }
+              try { return crypto.randomUUID(); } catch (e) {}
             }
             return Date.now().toString(36) + Math.random().toString(36).substring(2);
           };
 
-          // State initialization with LocalStorage persistence
           const [transactions, setTransactions] = useState(() => {
             try {
               const saved = localStorage.getItem('payback_transactions');
@@ -226,31 +271,25 @@
 
           const fileInputRef = useRef(null);
 
-          // Persist to LocalStorage whenever transactions change
           useEffect(() => {
             localStorage.setItem('payback_transactions', JSON.stringify(transactions));
           }, [transactions]);
 
-          // Aggregation Logic
           const totalUnpaid = useMemo(() => {
             return transactions
               .filter(t => !t.isPaid)
               .reduce((sum, t) => sum + t.amount, 0);
           }, [transactions]);
 
-          // Sorting Logic
           const sortedTransactions = useMemo(() => {
             return [...transactions].sort((a, b) => {
-              // Primary sort: Status (Unpaid/false comes before Paid/true)
               if (a.isPaid !== b.isPaid) {
                 return a.isPaid ? 1 : -1;
               }
-              // Secondary sort: Date (Newest first)
               return b.createdAt - a.createdAt;
             });
           }, [transactions]);
 
-          // Handlers
           const handleAddTransaction = (newTx) => {
             const transaction = {
               ...newTx,
@@ -270,7 +309,6 @@
             );
           };
 
-          // Backup & Restore Logic
           const handleBackup = () => {
             const dataStr = JSON.stringify(transactions, null, 2);
             const blob = new Blob([dataStr], { type: "application/json" });
@@ -291,7 +329,6 @@
             const file = e.target.files?.[0];
             if (!file) return;
 
-            // Reset input value immediately
             e.target.value = '';
             
             const reader = new FileReader();
@@ -304,16 +341,11 @@
               try {
                 const json = event.target?.result;
                 if (!json) throw new Error("Empty content");
-
                 const parsed = JSON.parse(json);
-                
-                // Ensure it's an array
                 if (!Array.isArray(parsed)) {
-                    alert('ファイル形式が正しくありません。リスト形式のJSONファイルを選択してください。');
+                    alert('ファイル形式が正しくありません。');
                     return;
                 }
-
-                // Permissive mapping
                 const restoredData = parsed
                     .map((item) => ({
                         id: item.id || generateId(),
@@ -330,13 +362,12 @@
                     alert('有効なデータが見つかりませんでした。');
                     return;
                 }
-
                 setTransactions(restoredData);
                 alert(`${restoredData.length}件のリストを復元しました。`);
 
               } catch (error) {
                 console.error("Restore failed", error);
-                alert('ファイルを解析できませんでした。正しいバックアップファイルか確認してください。');
+                alert('ファイルを解析できませんでした。');
               }
             };
             reader.readAsText(file);
@@ -344,8 +375,6 @@
 
           return (
             <div className="min-h-screen bg-gray-50 font-sans text-slate-900 pb-20">
-              
-              {/* Header */}
               <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
                 <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
                     <div className="flex items-center gap-2">
@@ -354,8 +383,6 @@
                             家計支払いリスト
                         </h1>
                     </div>
-                    
-                    {/* Backup/Restore Actions */}
                     <div className="flex items-center gap-3">
                         <input 
                             type="file" 
@@ -363,10 +390,10 @@
                             onChange={handleFileChange} 
                             className="hidden" 
                         />
-                        <button onClick={handleRestoreClick} className="text-slate-500 hover:text-slate-800 transition-colors" title="復元 (JSON)">
+                        <button onClick={handleRestoreClick} className="text-slate-500 hover:text-slate-800 transition-colors" title="復元">
                             <Upload className="w-5 h-5" />
                         </button>
-                        <button onClick={handleBackup} className="text-slate-500 hover:text-slate-800 transition-colors" title="バックアップ (JSON)">
+                        <button onClick={handleBackup} className="text-slate-500 hover:text-slate-800 transition-colors" title="バックアップ">
                             <Download className="w-5 h-5" />
                         </button>
                     </div>
@@ -374,21 +401,15 @@
               </header>
 
               <main className="max-w-2xl mx-auto px-4 py-3 space-y-2">
-                {/* Input Form */}
                 <section>
                   <TransactionForm onAdd={handleAddTransaction} />
                 </section>
-
-                {/* Total Unpaid Section */}
                 <StatsCard amount={totalUnpaid} />
-
-                {/* List Section */}
                 <section>
                   <div className="flex items-center justify-between mb-1 px-1">
                     <h2 className="text-xs font-bold text-slate-500">リスト</h2>
                     <span className="text-xs text-slate-400">{transactions.length}件</span>
                   </div>
-                  
                   <TransactionList 
                     transactions={sortedTransactions} 
                     onDelete={handleDeleteTransaction}
