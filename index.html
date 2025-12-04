@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>家計支払いリスト</title>
+
+    <!-- PWA / Mobile Web App Settings -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="支払いリスト">
+    <meta name="theme-color" content="#ffffff">
+
+    <!-- App Icon (Wallet Illustration) -->
+    <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231e293b' rx='100'/%3E%3Cpath d='M96 144h320c17.7 0 32 14.3 32 32v224c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V176c0-17.7 14.3-32 32-32z' fill='%23334155'/%3E%3Cpath d='M96 112h320v64H96z' fill='%23475569'/%3E%3Crect x='340' y='240' width='60' height='40' rx='8' fill='%23cbd5e1'/%3E%3Ccircle cx='370' cy='260' r='8' fill='%231e293b'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' fill='%231e293b' rx='100'/%3E%3Cpath d='M96 144h320c17.7 0 32 14.3 32 32v224c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V176c0-17.7 14.3-32 32-32z' fill='%23334155'/%3E%3Cpath d='M96 112h320v64H96z' fill='%23475569'/%3E%3Crect x='340' y='240' width='60' height='40' rx='8' fill='%23cbd5e1'/%3E%3Ccircle cx='370' cy='260' r='8' fill='%231e293b'/%3E%3C/svg%3E">
+
+    <!-- Web App Manifest (Embedded Data URI) -->
+    <link rel="manifest" href='data:application/manifest+json,{"name":"家計支払いリスト","short_name":"支払いリスト","start_url":".","display":"standalone","background_color":"#ffffff","theme_color":"#ffffff","icons":[{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 fill=%27%231e293b%27 rx=%27100%27/%3E%3Cpath d=%27M96 144h320c17.7 0 32 14.3 32 32v224c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V176c0-17.7 14.3-32 32-32z%27 fill=%27%23334155%27/%3E%3Cpath d=%27M96 112h320v64H96z%27 fill=%27%23475569%27/%3E%3Crect x=%27340%27 y=%27240%27 width=%2760%27 height=%2740%27 rx=%278%27 fill=%27%23cbd5e1%27/%3E%3Ccircle cx=%27370%27 cy=%27260%27 r=%278%27 fill=%27%231e293b%27/%3E%3C/svg%3E","sizes":"192x192","type":"image/svg+xml"},{"src":"data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 512 512%27%3E%3Crect width=%27512%27 height=%27512%27 fill=%27%231e293b%27 rx=%27100%27/%3E%3Cpath d=%27M96 144h320c17.7 0 32 14.3 32 32v224c0 17.7-14.3 32-32 32H96c-17.7 0-32-14.3-32-32V176c0-17.7 14.3-32 32-32z%27 fill=%27%23334155%27/%3E%3Cpath d=%27M96 112h320v64H96z%27 fill=%27%23475569%27/%3E%3Crect x=%27340%27 y=%27240%27 width=%2760%27 height=%2740%27 rx=%278%27 fill=%27%23cbd5e1%27/%3E%3Ccircle cx=%27370%27 cy=%27260%27 r=%278%27 fill=%27%231e293b%27/%3E%3C/svg%3E","sizes":"512x512","type":"image/svg+xml"}]}'>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+      body { font-family: 'Inter', 'Noto Sans JP', sans-serif; }
+      /* Disable pull-to-refresh on mobile */
+      body { overscroll-behavior-y: none; }
+    </style>
+
+    <!-- Import Map for Modules -->
+    <script type="importmap">
+    {
+      "imports": {
+        "react": "https://esm.sh/react@18.2.0",
+        "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+        "lucide-react": "https://esm.sh/lucide-react@0.263.1"
+      }
+    }
+    </script>
+    
+    <!-- Babel Standalone for in-browser JSX compilation -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+<body class="bg-gray-50">
+    <div id="root"></div>
+
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useMemo, useRef } from 'react';
+        import { createRoot } from 'react-dom/client';
+        import { Wallet, Download, Upload, Plus, Trash2, AlertCircle } from 'lucide-react';
+
+        // --- COMPONENTS ---
+
+        // 1. StatsCard Component
+        const StatsCard = ({ amount }) => {
+          return (
+            <div className="bg-white rounded-lg p-2 shadow-sm border border-slate-200 text-center">
+              <p className="text-slate-500 text-[10px] font-bold mb-0.5 flex items-center justify-center gap-1">
+                <AlertCircle className="w-3 h-3 text-orange-500" />
+                もらう金額合計
+              </p>
+              <div className="text-xl font-extrabold text-slate-800 tracking-tight">
+                ¥{amount.toLocaleString()}
+              </div>
+            </div>
+          );
+        };
+
+        // 2. TransactionForm Component
+        const TransactionForm = ({ onAdd }) => {
+          const [title, setTitle] = useState('');
+          const [amount, setAmount] = useState('');
+
+          const handleSubmit = (e) => {
+            e.preventDefault();
+            if (!title || !amount) return;
+
+            onAdd({
+              title,
+              personName: '',
+              amount: parseInt(amount, 10),
+              date: new Date().toISOString().split('T')[0],
+              isPaid: false,
+            });
+
+            setTitle('');
+            setAmount('');
+          };
+
+          return (
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-2">
+              <form onSubmit={handleSubmit} className="flex gap-2 items-center">
+                {/* Title Input */}
+                <input
+                    type="text"
+                    required
+                    placeholder="項目名"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="flex-[2] px-3 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:border-indigo-500 bg-slate-50"
+                />
+
+                {/* Amount Input */}
+                <div className="flex-1 relative min-w-[90px]">
+                    <span className="absolute left-2 top-1.5 text-slate-400 text-sm">¥</span>
+                    <input
+                        type="number"
+                        required
+                        min="1"
+                        placeholder="0"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="w-full pl-5 pr-2 py-1.5 border border-slate-200 rounded text-sm focus:outline-none focus:border-indigo-500 bg-slate-50 font-medium"
+                    />
+                </div>
+
+                {/* Submit Button */}
+                <button
+                    type="submit"
+                    className="flex-shrink-0 bg-slate-800 hover:bg-slate-700 text-white p-1.5 rounded transition-colors shadow-sm"
+                    title="追加"
+                >
+                    <Plus className="h-5 w-5" />
+                </button>
+              </form>
+            </div>
+          );
+        };
+
+        // 3. TransactionList Component
+        const TransactionList = ({ transactions, onDelete, onToggleStatus }) => {
+          if (transactions.length === 0) {
+            return (
+              <div className="text-center py-8 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                <p className="text-xs text-slate-400">データがありません</p>
+              </div>
+            );
+          }
+
+          return (
+            <div className="bg-white rounded-lg shadow-sm border border-slate-200 overflow-hidden divide-y divide-slate-100">
+              {transactions.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className={`flex items-center justify-between px-2 py-1.5 transition-colors ${
+                    transaction.isPaid ? 'bg-slate-50' : 'bg-white'
+                  }`}
+                >
+                  {/* Left: Status & Title */}
+                  <div className="flex items-center gap-2 flex-1 min-w-0">
+                    <button
+                      onClick={() => onToggleStatus(transaction.id)}
+                      className={`flex-shrink-0 w-[80px] py-1 text-[10px] font-bold rounded border transition-all ${
+                        transaction.isPaid
+                          ? 'bg-slate-200 text-slate-500 border-slate-300'
+                          : 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100'
+                      }`}
+                    >
+                      {transaction.isPaid ? '済' : 'もらってない'}
+                    </button>
+                    
+                    <p className={`text-sm font-bold truncate ${transaction.isPaid ? 'text-slate-400' : 'text-slate-800'}`}>
+                      {transaction.title}
+                    </p>
+                  </div>
+
+                  {/* Right: Amount & Actions */}
+                  <div className="flex items-center gap-2">
+                    <p className={`text-sm font-bold tabular-nums ${transaction.isPaid ? 'text-slate-400' : 'text-slate-900'}`}>
+                      ¥{transaction.amount.toLocaleString()}
+                    </p>
+
+                    <div className="flex items-center pl-1">
+                      {/* Delete Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation(); 
+                            e.nativeEvent.stopImmediatePropagation(); // Ensure absolute priority
+                            onDelete(transaction.id);
+                        }}
+                        className="relative z-10 p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded transition-colors cursor-pointer"
+                        title="削除"
+                      >
+                        <Trash2 className="w-4 h-4 pointer-events-none" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          );
+        };
+
+        // --- MAIN APP ---
+        const App = () => {
+          // Helper for ID generation
+          const generateId = () => {
+            if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+              try {
+                return crypto.randomUUID();
+              } catch (e) {
+                // Fallback
+              }
+            }
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
+          };
+
+          // State initialization with LocalStorage persistence
+          const [transactions, setTransactions] = useState(() => {
+            try {
+              const saved = localStorage.getItem('payback_transactions');
+              return saved ? JSON.parse(saved) : [];
+            } catch (e) {
+              console.error("Failed to load transactions", e);
+              return [];
+            }
+          });
+
+          const fileInputRef = useRef(null);
+
+          // Persist to LocalStorage whenever transactions change
+          useEffect(() => {
+            localStorage.setItem('payback_transactions', JSON.stringify(transactions));
+          }, [transactions]);
+
+          // Aggregation Logic
+          const totalUnpaid = useMemo(() => {
+            return transactions
+              .filter(t => !t.isPaid)
+              .reduce((sum, t) => sum + t.amount, 0);
+          }, [transactions]);
+
+          // Sorting Logic
+          const sortedTransactions = useMemo(() => {
+            return [...transactions].sort((a, b) => {
+              // Primary sort: Status (Unpaid/false comes before Paid/true)
+              if (a.isPaid !== b.isPaid) {
+                return a.isPaid ? 1 : -1;
+              }
+              // Secondary sort: Date (Newest first)
+              return b.createdAt - a.createdAt;
+            });
+          }, [transactions]);
+
+          // Handlers
+          const handleAddTransaction = (newTx) => {
+            const transaction = {
+              ...newTx,
+              id: generateId(), 
+              createdAt: Date.now(),
+            };
+            setTransactions((prev) => [transaction, ...prev]);
+          };
+
+          const handleDeleteTransaction = (id) => {
+            setTransactions((prev) => prev.filter((t) => t.id !== id));
+          };
+
+          const handleToggleStatus = (id) => {
+            setTransactions((prev) =>
+              prev.map((t) => (t.id === id ? { ...t, isPaid: !t.isPaid } : t))
+            );
+          };
+
+          // Backup & Restore Logic
+          const handleBackup = () => {
+            const dataStr = JSON.stringify(transactions, null, 2);
+            const blob = new Blob([dataStr], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `payback_list.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+          };
+
+          const handleRestoreClick = () => {
+            fileInputRef.current?.click();
+          };
+
+          const handleFileChange = (e) => {
+            const file = e.target.files?.[0];
+            if (!file) return;
+
+            // Reset input value immediately
+            e.target.value = '';
+            
+            const reader = new FileReader();
+            
+            reader.onerror = () => {
+                alert('ファイルの読み込みに失敗しました。');
+            };
+
+            reader.onload = (event) => {
+              try {
+                const json = event.target?.result;
+                if (!json) throw new Error("Empty content");
+
+                const parsed = JSON.parse(json);
+                
+                // Ensure it's an array
+                if (!Array.isArray(parsed)) {
+                    alert('ファイル形式が正しくありません。リスト形式のJSONファイルを選択してください。');
+                    return;
+                }
+
+                // Permissive mapping
+                const restoredData = parsed
+                    .map((item) => ({
+                        id: item.id || generateId(),
+                        title: item.title || '無題',
+                        amount: parseInt(item.amount, 10) || 0,
+                        personName: item.personName || '',
+                        date: item.date || new Date().toISOString().split('T')[0],
+                        isPaid: !!item.isPaid,
+                        createdAt: item.createdAt || Date.now(),
+                    }))
+                    .filter((t) => t.amount > 0 || t.title !== '無題');
+
+                if (restoredData.length === 0) {
+                    alert('有効なデータが見つかりませんでした。');
+                    return;
+                }
+
+                setTransactions(restoredData);
+                alert(`${restoredData.length}件のリストを復元しました。`);
+
+              } catch (error) {
+                console.error("Restore failed", error);
+                alert('ファイルを解析できませんでした。正しいバックアップファイルか確認してください。');
+              }
+            };
+            reader.readAsText(file);
+          };
+
+          return (
+            <div className="min-h-screen bg-gray-50 font-sans text-slate-900 pb-20">
+              
+              {/* Header */}
+              <header className="bg-white border-b border-gray-200 sticky top-0 z-20">
+                <div className="max-w-2xl mx-auto px-4 h-12 flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <Wallet className="w-5 h-5 text-slate-700" />
+                        <h1 className="text-base font-bold text-slate-800">
+                            家計支払いリスト
+                        </h1>
+                    </div>
+                    
+                    {/* Backup/Restore Actions */}
+                    <div className="flex items-center gap-3">
+                        <input 
+                            type="file" 
+                            ref={fileInputRef} 
+                            onChange={handleFileChange} 
+                            className="hidden" 
+                        />
+                        <button onClick={handleRestoreClick} className="text-slate-500 hover:text-slate-800 transition-colors" title="復元 (JSON)">
+                            <Upload className="w-5 h-5" />
+                        </button>
+                        <button onClick={handleBackup} className="text-slate-500 hover:text-slate-800 transition-colors" title="バックアップ (JSON)">
+                            <Download className="w-5 h-5" />
+                        </button>
+                    </div>
+                </div>
+              </header>
+
+              <main className="max-w-2xl mx-auto px-4 py-3 space-y-2">
+                {/* Input Form */}
+                <section>
+                  <TransactionForm onAdd={handleAddTransaction} />
+                </section>
+
+                {/* Total Unpaid Section */}
+                <StatsCard amount={totalUnpaid} />
+
+                {/* List Section */}
+                <section>
+                  <div className="flex items-center justify-between mb-1 px-1">
+                    <h2 className="text-xs font-bold text-slate-500">リスト</h2>
+                    <span className="text-xs text-slate-400">{transactions.length}件</span>
+                  </div>
+                  
+                  <TransactionList 
+                    transactions={sortedTransactions} 
+                    onDelete={handleDeleteTransaction}
+                    onToggleStatus={handleToggleStatus}
+                  />
+                </section>
+              </main>
+            </div>
+          );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
